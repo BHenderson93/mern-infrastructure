@@ -55,9 +55,14 @@ async function login(req,res){
         console.log('login - hit error')
         res.status(400).json(err)
     } 
-
 }
 
-module.exports = { create , login}
+function checkToken(req, res) {
+    // req.user will always be there for you when a token is sent
+    console.log('req.user', req.user);
+    res.json(req.exp);
+  }
+
+module.exports = { create , login , checkToken}
 
 

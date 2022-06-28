@@ -1,38 +1,37 @@
+import * as userService from './users-service'
+
 const BASE_URL = '/api/users/'
 
-export async function signUp(userData){
+export function signUp(userData) {
+    return sendRequest(BASE_URL, 'POST', userData);
+  }
+  
+  export function login(credentials) {
+    return sendRequest(`${BASE_URL}/login`, 'POST', credentials);
+  }
 
-    console.log('in users-api. userdata, baseurl is ' , userData , BASE_URL)
-    console.log('stringified = ' , JSON.stringify(userData))
+  export function checkToken() {
+    return sendRequest(`${BASE_URL}/check-token`);
+  }
 
-    const res = await fetch(BASE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
+  /* HELPER FUNCTIONS */
 
-    if(res.ok){
-        return res.json()
-    }else{
-        console.log('res not ok')
-        throw new Error('Invalid Sign Up')
+async function sendRequest(url, method = 'GET', payload = null) {
+    const options = { method };
+    
+    if (payload) {
+      options.headers = { 'Content-Type': 'application/json' };
+      options.body = JSON.stringify(payload);
     }
-}
-
-const LOGIN_URL = '/api/users/login'
-
-export async function login(creds){
-    //creds are {email, password} need to use bcrypt compare
-    const user = await fetch(LOGIN_URL,{
-        method:'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:JSON.stringify(creds)
-    })
-
-    if(user.ok){
-        return user.json()
-    }else{
-        console.log('Bad login.')
-        throw new Error('Unable to login with provided information.')
+    
+    const token = userService.getToken()
+    if(token){
+        //this differs from class, might need to check
+        options.headers = { ...options.headers , Authorization:token}
     }
-}
+
+    const res = await fetch(url, options);
+    // res.ok will be false if the status code set to 4xx in the controller action
+    if (res.ok) return res.json();
+    throw new Error('Bad Request');
+  }

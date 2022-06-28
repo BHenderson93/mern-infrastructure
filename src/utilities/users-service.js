@@ -14,6 +14,11 @@ export async function login(credentials){
     return getUser()
 }
 
+export async function checkToken(){
+    return usersAPI.checkToken()
+    .then(dateStr => new Date(dateStr));
+}
+
 export function logOut(){
     localStorage.removeItem('token');
 }
@@ -38,3 +43,4 @@ export function getUser(){
     const token = getToken()
     return token ? JSON.parse(atob(token.split('.')[1])).user:null
 }
+
